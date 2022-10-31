@@ -1,9 +1,128 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form'
+
+// import Input from './components/Input/index';
 
 function App() {
+  const [pais, setPais] = useState([])
+  const [cidade, setCidade] = useState([])
+
+  const { register, handleSubmit, formState: {errors} } = useForm()
+
+  // Faz as requisições para as APIs
+  useEffect(() => {
+    fetch('https://amazon-api.sellead.com/country')
+      .then(response => response.json())
+      .then(data => setPais(data))
+
+      fetch('https://amazon-api.sellead.com/city')
+      .then(response => response.json())
+      .then(data => setCidade(data))
+  }, [])
+
+  // Gera uma lista de tags Options com os Países
+  const paises = pais.map(p => {
+     return <option key={p['id']} value={p['name_ptbr']}>{p['name_ptbr']}</option>
+  })
+
+  // Gera uma lista de tags Options com as Cidades
+  const cidades = cidade.map(c => {
+    const nome = c['name_ptbr']
+    let nomeLista = []
+    if (nome != null) {
+      nomeLista = c['name_ptbr'].split(',')
+      return <option key={c['id']} value={nomeLista[0]}>{nomeLista[0]}</option>
+    } 
+  })
+
   return (
-    <h1>Teste</h1>
+    <div className="container">
+      <form onSubmit={handleSubmit((data) => {
+        console.log(data)
+      })}>
+        <div className="content">
+          <div className="personalInfo">
+            <h2>Dados Pessoais</h2>
+            <input {...register("nome", {required: "Digite seu nome."})} type="text" placeholder='Nome' />
+            <p>{errors.nome?.message}</p>
+
+            <input {...register("email", {required: "Digite seu Email"})} type="email" placeholder='Email' />
+            <p>{errors.email?.message}</p>
+
+            <input {...register("tel", {required: "Digite seu Telefone"})} type="tel" placeholder='Telefone' />
+            <p>{errors.tel?.message}</p>
+
+            <input {...register("cpf", {required: "Digite seu CPF", minLength: {
+              value: 11,
+              message: "O CPF deve conter 11 números."
+            }, maxLength: {
+              value: 11,
+              message: "O CPF deve conter 11 números."
+            }})} type="text" placeholder='CPF' />
+            <p>{errors.cpf?.message}</p>
+
+          </div>
+          <div className="InterestingPlaces">
+          <h2>Destinos de Interesse</h2>
+            <select {...register('pais', {required: "Escolha um País."})}>
+              <option value="">-- Escolha --</option>
+              {paises}
+            </select>
+            <p>{errors.pais?.message}</p>
+
+            <select {...register('cidade', {required: "Escolha uma Cidade."})}>
+              <option value="">-- Escolha --</option>
+              {cidades}
+            </select>
+            <p>{errors.cidade?.message}</p>
+            
+          </div>
+        </div>
+
+        <input type="submit" />
+      
+      </form>
+    </div>
+
+    // <form onSubmit={handleSubmit(data => {
+    //   console.log(data)
+    // })}>
+    //   <h2>Dados Pessoais</h2>
+    //          <input {...register("nome", {required: "Digite seu nome."})} type="text" placeholder='Nome' />
+    //          <p>{errors.nome?.message}</p>
+
+    //          <input {...register("email", {required: "Digite seu Email"})} type="email" placeholder='Email' />
+    //          <p>{errors.email?.message}</p>
+
+    //          <input {...register("tel", {required: "Digite seu Telefone"})} type="tel" placeholder='Telefone' />
+    //          <p>{errors.tel?.message}</p>
+
+    //          <input {...register("cpf", {required: "Digite seu CPF", minLength: {
+    //            value: 11,
+    //            message: "O CPF deve conter 11 números."
+    //          }, maxLength: {
+    //            value: 11,
+    //            message: "O CPF deve conter 11 números."
+    //          }})} type="text" placeholder='CPF' />
+    //          <p>{errors.cpf?.message}</p>
+
+    //          <h2>Destinos de Interesse</h2>
+    //          <select {...register('pais', {required: "Escolha um País."})}>
+    //            <option value="">-- Escolha --</option>
+    //            {paises}
+    //          </select>
+    //          <p>{errors.pais?.message}</p>
+
+    //          <select {...register('cidade', {required: "Escolha uma Cidade."})}>
+    //            <option value="">-- Escolha --</option>
+    //            {cidades}
+    //          </select>
+    //          <p>{errors.cidade?.message}</p>
+
+
+
+    //          <button type="submit">Enviar</button>
+    // </form>
   )
 }
 
